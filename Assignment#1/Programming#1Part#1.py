@@ -1,6 +1,7 @@
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+import math
 
 
 #converting image into image array
@@ -145,3 +146,13 @@ if __name__ == "__main__":
     gy_filtered_output_2 = (gy_filtered_output_2 - gy_filtered_output_2.min()) / (
                 gy_filtered_output_2.max() - gy_filtered_output_2.min())
     display_dog_filter_output(gx_filtered_output_2, gy_filtered_output_2, original_image_2)
+    gx_squared_1 = np.square(gx_filtered_output_1)
+    gy_squared_1 = np.square(gy_filtered_output_1)
+    sobel_filter_result_1 = np.sqrt(gx_squared_1 + gy_squared_1)
+    gx_squared_2 = np.square(gx_filtered_output_2)
+    gy_squared_2 = np.square(gy_filtered_output_2)
+    sobel_filter_result_2 = np.sqrt(gx_squared_2 + gy_squared_2)
+    print("output of image 1 from Sobel Filter")
+    display_image_gaussian_filter(original_image_1, sobel_filter_result_1)
+    print("output of image 2 from Sobel Filter")
+    display_image_gaussian_filter(original_image_2, sobel_filter_result_2)
