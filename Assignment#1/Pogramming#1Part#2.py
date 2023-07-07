@@ -64,21 +64,6 @@ def calculate_centroids(k, data, cluster):
 
 
 
-#visulization of data after clustering
-def visualize_clusters(data,cluster, centroids):
-    df = pd.DataFrame(dict(x=data[:,0], y=data[:,1], label=cluster))
-    # colors = {0:'blue', 1:'orange'}
-    #colors = {0:'blue', 1:'orange', 2:'green'}
-    colors = {0:'blue', 1:'orange', 2:'green',3:'red'}
-    #colors = {0:'blue', 1:'orange', 2:'green',3:'red', 4:'purple', 5:'brown',6:'yellow',7:'pink',8:'indigo'}
-    fig, ax = plt.subplots(figsize=(6, 6))
-    grouped = df.groupby('label')
-    for key, group in grouped:
-        group.plot(ax=ax, kind='scatter', x='x', y='y', label=key, color=colors[key])
-    ax.scatter(centroids[:, 0], centroids[:, 1], color='red', marker='*')
-    plt.show()
-
-
 #deciding the stopping condition
 def measure_diff(centroids_prev, centroids_new):
     result = 0
@@ -88,28 +73,57 @@ def measure_diff(centroids_prev, centroids_new):
 
 
 
-def k_means_clustering(k, data):
+def k_means(data, k,  r):
     cluster = [0]*len(data)
     centroid_prev = initialize_centroids(k, data)
-    #stopping criterion
-    centroid_diff = 100
-    while centroid_diff >.001:
-        cluster = cluster_assignment(k, data, centroid_prev)
-        visualize_clusters(data, cluster, centroid_prev)
-        centroid_new = calculate_centroids(k, data, cluster)
-        centroid_diff = measure_diff(centroid_new, centroid_prev)
-        centroid_prev = centroid_new
-    return cluster
+    best_error = float('inf')
+    best_centroids = None
+    prev_error = None
+
+    for _ in range(r):
+        while True:
+            cluster = cluster_assignment(k, data, centroid_prev)
+            centroid_new = calculate_centroids(k, data, cluster)
+            centroid_diff = measure_diff(centroid_new, centroid_prev)
+            # Calculate the sum of squares error
+            error = centroid_diff
+            if prev_error is not None and error >= prev_error:
+                break
+
+            prev_error = error
+            centroid_prev = centroid_new
+
+        if error < best_error:
+            best_error = error
+            best_centroids = centroid_new
+
+    return best_centroids, best_error
 
 
-# Suppress the UserWarning
-warnings.filterwarnings("ignore", category=UserWarning)
 
-#varying number of clusters
-if __name__ == "__main__":
-    # k = 2
-    # cluster = k_means_clustering(k, data)
-    # # k = 3
-    # # cluster = k_means_clustering(k, data)
-    k = 4
-    cluster = k_means_clustering(k, data)
+
+k_values = [2, 3, 4]
+results = []
+
+for k in k_values:
+    centroids, error = k_means(data, k, r=10)
+    results.append((centroids, error))
+
+# Plot the results
+plt.figure(figsize=(12, 6))
+
+for i, (centroids, _) in enumerate(results):
+    plt.subplot(1, len(k_values), i+1)
+    plt.scatter(data[:, 0], data[:, 1], c=np.random.rand(len(data)), alpha=0.5)
+    plt.scatter(centroids[:, 0], centroids[:, 1], c='red', marker='x')
+    plt.title(f'K = {len(centroids)}')
+    plt.xlabel('X')
+    plt.ylabel('Y')
+
+plt.tight_layout()
+plt.show()
+
+# Print the sum of squares error for each model
+for i, (_, error) in enumerate(results):
+    print(f'Sum of Squares Error (K={k_values[i]}): {error}')
+
