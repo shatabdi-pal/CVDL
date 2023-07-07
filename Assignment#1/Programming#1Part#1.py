@@ -1,7 +1,10 @@
+#Programming Assignment#1 Part#1
+#Implemenation of Gaussian Filter, DoG Filter, Sobel Filter
+
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
-import math
+
 
 
 #converting image into image array
