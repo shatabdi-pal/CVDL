@@ -2,128 +2,113 @@
 #Implemenation of K-Means clustering Algorithm
 
 
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import figure
-import warnings
+import pandas as pd
+from PIL import Image
 
 
 #reading .txt file into dataframe
 data = np.loadtxt("510_cluster_dataset.txt")
-
 
 #visulization of initial dataset
 df = pd.DataFrame({'x': data[:,0], 'y': data[:,1]})
 plt.scatter(df['x'], df['y'])
 plt.show()
 
+def k_means(X, K, max_iters=100, r=10):
+    best_sse = np.inf
+    best_centriods = None
 
-#initialization of centriods by random values
-def initialize_centroids(k, data):
-    centroids = []
-    for i in range(k):
-        x = np.random.uniform(min(data[:,0]), max(data[:,0]))
-        y = np.random.uniform(min(data[:,1]), max(data[:,1]))
-        centroids.append([x, y])
-    return np.asarray(centroids)
+    for i in range(r):
+        # Initialize cluster centriods randomly
+        centriods = X[np.random.choice(range(len(X)), size=K, replace=False)]
 
+        for j in range(max_iters):
+            # Assign each data point to the nearest cluster
+            distances = np.linalg.norm(X[:, np.newaxis] - centriods, axis=2)
+            clusters = np.argmin(distances, axis=1)
 
-#euclidean distance calculation
-def distance_calculation(xi, yi):
-    distance = np.sqrt(sum(np.square(xi-yi)))
-    return distance
+            # Update cluster centriods
+            new_centriods = np.array([X[clusters == k].mean(axis=0) for k in range(K)])
 
-
-
-#cluster assignment based on the distance of data point from centroids
-def cluster_assignment(k, data, centroids):
-    cluster = [-1]*len(data)
-    for i in range(len(data)):
-        dist_arr = []
-        for j in range(k):
-            temp = distance_calculation(data[i], centroids[j])
-            dist_arr.append(temp)
-        index = np.argmin(dist_arr)
-        cluster[i] = index
-    return np.asarray(cluster)
-
-
-
-#updating the centroids
-def calculate_centroids(k, data, cluster):
-    centroid = []
-    for i in range(k):
-        temp = []
-        for j in range(len(data)):
-            if cluster[j]==i:
-                temp.append(data[j])
-                new_mean = np.mean(temp, axis=0)
-        centroid.append(new_mean)
-    return np.asarray(centroid)
-
-
-
-#deciding the stopping condition
-def measure_diff(centroids_prev, centroids_new):
-    result = 0
-    for m,n in zip(centroids_prev,centroids_new):
-        result+= distance_calculation(m,n)
-    return result
-
-
-
-def k_means(data, k,  r):
-    cluster = [0]*len(data)
-    centroid_prev = initialize_centroids(k, data)
-    best_error = float('inf')
-    best_centroids = None
-    prev_error = None
-
-    for _ in range(r):
-        while True:
-            cluster = cluster_assignment(k, data, centroid_prev)
-            centroid_new = calculate_centroids(k, data, cluster)
-            centroid_diff = measure_diff(centroid_new, centroid_prev)
-            # Calculate the sum of squares error
-            error = centroid_diff
-            if prev_error is not None and error >= prev_error:
+            # Check convergence
+            if np.all(centriods == new_centriods):
                 break
 
-            prev_error = error
-            centroid_prev = centroid_new
+            centriods = new_centriods
 
-        if error < best_error:
-            best_error = error
-            best_centroids = centroid_new
+        # Calculate the sum of squares error (SSE)
+        sse = np.sum(np.square(X - centriods[clusters]), axis=1).sum()
 
-    return best_centroids, best_error
+        # Keep track of the best SSE and corresponding cluster centriods
+        if sse < best_sse:
+            best_sse = sse
+            best_centriods = centriods
+
+    return best_centriods, clusters, best_sse
 
 
 
 
+
+# Run K-Means for K=2, K=3, and K=4
 k_values = [2, 3, 4]
-results = []
+errors = []
 
-for k in k_values:
-    centroids, error = k_means(data, k, r=10)
-    results.append((centroids, error))
+plt.figure(figsize=(12, 4))
 
-# Plot the results
-plt.figure(figsize=(12, 6))
+for i, K in enumerate(k_values):
+    centriods, clusters, sse = k_means(data, K)
+    errors.append(sse)
 
-for i, (centroids, _) in enumerate(results):
-    plt.subplot(1, len(k_values), i+1)
-    plt.scatter(data[:, 0], data[:, 1], c=np.random.rand(len(data)), alpha=0.5)
-    plt.scatter(centroids[:, 0], centroids[:, 1], c='red', marker='x')
-    plt.title(f'K = {len(centroids)}')
-    plt.xlabel('X')
-    plt.ylabel('Y')
+    plt.subplot(1, 3, i + 1)
+    plt.scatter(data[:, 0], data[:, 1], c=clusters, cmap='viridis')
+    plt.scatter(centriods[:, 0], centriods[:, 1], c='red', marker='X', s=100)
+    plt.title(f'K = {K}, SSE = {sse:.2f}')
 
 plt.tight_layout()
 plt.show()
 
-# Print the sum of squares error for each model
-for i, (_, error) in enumerate(results):
-    print(f'Sum of Squares Error (K={k_values[i]}): {error}')
+# Print the sum of squares error for each K value
+for i, K in enumerate(k_values):
+    print(f'K = {K}, SSE = {errors[i]:.2f}')
 
+
+def image_k_means(image, K, max_iters=100, r=10):
+    # Convert the image to RGB array
+    image_rgb = np.array(image.convert("RGB"))
+
+    # Reshape the RGB array to 2D
+    image_2d = image_rgb.reshape(-1, 3)
+
+    # Run K-Means on the image
+    centriods, clusters, sse = k_means(image_2d, K, max_iters, r)
+
+    # Reshape the clusters back to 2D
+    image_clusters = clusters.reshape(image_rgb.shape[:2])
+
+    return centriods, image_clusters, sse
+
+
+# Load the images
+image1 = Image.open("Kmean_img1.jpg")
+image2 = Image.open("Kmean_img2.jpg")
+
+# Run K-Means for K=5 and K=10 on the images
+k_values_images = [5, 10]
+errors_images = []
+
+for i, K in enumerate(k_values_images):
+    centriods, image_clusters, sse = image_k_means(image1, K)
+    errors_images.append(sse)
+
+    plt.figure()
+    plt.imshow(image_clusters, cmap='viridis')
+    plt.title(f'K = {K}, SSE = {sse:.2f}')
+    plt.axis('off')
+    plt.show()
+
+# Print the sum of squares error for each K value
+for i, K in enumerate(k_values_images):
+    print(f'K = {K}, SSE = {errors_images[i]:.2f}')
