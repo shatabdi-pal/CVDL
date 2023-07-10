@@ -6,13 +6,13 @@ import cv2 as cv
 import sys
 
 #Load the image
-image_1 = cv.imread("SIFT1_img.jpg")
-image_2 = cv.imread("SIFT2_img.jpg")
+input_image_1 = cv.imread("SIFT1_img.jpg")
+input_image_2 = cv.imread("SIFT2_img.jpg")
 
 #error checking for loading images
-if image_1 is None:
+if input_image_1 is None:
     sys.exit("Unable to read image 1")
-if image_2 is None:
+if input_image_2 is None:
     sys.exit("Unable to read image 2")
 
 # Initialize SIFT detector
@@ -22,8 +22,15 @@ sift = cv.SIFT_create()
 bf = cv.BFMatcher()
 
 #converting to gray scale
-image_1 = cv.cvtColor(image_1, cv.COLOR_BGR2GRAY)
-image_2 = cv.cvtColor(image_2, cv.COLOR_BGR2GRAY)
+input_image_1 = cv.cvtColor(input_image_1, cv.COLOR_BGR2GRAY)
+input_image_2 = cv.cvtColor(input_image_2, cv.COLOR_BGR2GRAY)
+
+desired_width = 800
+desired_height = 800
+
+# Resize the image
+image_1 = cv.resize(input_image_1, (desired_width, desired_height))
+image_2 = cv.resize(input_image_2, (desired_width, desired_height))
 
 #detecting keypoints for image 1
 key_points = sift.detect(image_1, None)
@@ -32,7 +39,7 @@ key_points = sift.detect(image_1, None)
 def visualize_keypoints(image, keypoints):
     # Draw keypoints on the image
     image_with_keypoints = cv.drawKeypoints(image, keypoints, None, flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-    cv.imshow("First Image with Keypoints", image_with_keypoints)
+    cv.imshow("Image with Keypoints", image_with_keypoints)
     cv.waitKey(0)
     cv.destroyAllWindows()
 
@@ -61,13 +68,20 @@ def match_key_points(image_1, image_2):
     image2_with_keypoints = cv.drawKeypoints(image_2, key_points_2, None, flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
     #Draw connecting lines with matched keypoints
-    result_image = cv.drawMatches(image1_with_keypoints, key_points_1, image2_with_keypoints, key_points_2, top_matches, None)
-
+    #result_image = cv.drawMatches(image1_with_keypoints, key_points_1, image2_with_keypoints, key_points_2, top_matches, None)
+    result_image = cv.drawMatches(image_1, key_points_1, image_2, key_points_2, top_matches, None)
 
     #Display images with keypoints and matches
+
     cv.imshow('Image 1 with keypoints',image1_with_keypoints)
+    cv.waitKey(0)
+    cv.destroyAllWindows()
+
     cv.imshow('Image 2 with keypoints',image2_with_keypoints)
-    cv.imshow('Matched keypoints',result_image)
+    cv.waitKey(0)
+    cv.destroyAllWindows()
+
+    cv.imshow('Result image with matched keypoints',result_image)
     cv.waitKey(0)
     cv.destroyAllWindows()
 
