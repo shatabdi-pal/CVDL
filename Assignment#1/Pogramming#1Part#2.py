@@ -26,7 +26,7 @@ def k_means(X, K, max_iters=100, r=10):
 
         for j in range(max_iters):
             # Assign each data point to the nearest cluster
-            distances = np.linalg.norm(X[:, np.newaxis] - centriods, axis=2)
+            distances = np.sqrt(np.sum((X[:, np.newaxis] - centriods) ** 2, axis=2))
             clusters = np.argmin(distances, axis=1)
 
             # Update cluster centriods
@@ -64,7 +64,7 @@ for i, K in enumerate(k_values):
 
     plt.subplot(1, 3, i + 1)
     plt.scatter(data[:, 0], data[:, 1], c=clusters, cmap='viridis')
-    plt.scatter(centriods[:, 0], centriods[:, 1], c='red', marker='X', s=100)
+    plt.scatter(centriods[:, 0], centriods[:, 1], c='red', marker='*', s=150)
     plt.title(f'K = {K}, SSE = {sse:.2f}')
 
 plt.tight_layout()
