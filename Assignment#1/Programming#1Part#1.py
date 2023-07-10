@@ -14,40 +14,71 @@ def load_image(image_path):
     return image_array
 
 #convolution of gray scale image array by Gaussian Filter
-def gaussian_filter_gray_image(image, filter_size):
+def gaussian_filter_image_1(image, filter_size):
     image_height, image_width = image.shape
-    filter = np.array([[1, 2, 1],
-                        [2, 4, 2],
-                        [1, 2, 1]]) / 16
-    padding = 1
-    padded_image = np.pad(image, ((padding, padding), (padding, padding)), mode='constant')
-    filtered_image = np.zeros_like(image)
-    for i in range(image_height):
-        for j in range(image_width):
-            patch = padded_image[i:i + filter_size, j:j + filter_size]
-            filtered_image[i, j] = np.sum(patch * filter)
+    if filter_size == 3:
+        filter = np.array([[1, 2, 1],
+                            [2, 4, 2],
+                            [1, 2, 1]]) / 16
+        padding = 1
+        padded_image = np.pad(image, ((padding, padding), (padding, padding)), mode='constant')
+        filtered_image = np.zeros_like(image)
+        for i in range(image_height):
+            for j in range(image_width):
+                patch = padded_image[i:i + filter_size, j:j + filter_size]
+                filtered_image[i, j] = np.sum(patch * filter)
+
+    elif filter_size == 5:
+        filter = np.array([[1, 4, 7, 4, 1],
+                           [4, 16, 26, 16, 4],
+                           [7, 26, 41, 26, 7],
+                           [4, 16, 26, 16, 4],
+                           [1, 4, 7, 4, 1]]) / 273
+
+        padding = 2
+        padded_image = np.pad(image, ((padding, padding), (padding, padding)), mode='constant')
+        filtered_image = np.zeros_like(image)
+        for i in range(image_height):
+            for j in range(image_width):
+                patch = padded_image[i:i + filter_size, j:j + filter_size]
+                filtered_image[i, j] = np.sum(patch * filter)
 
     return filtered_image
 
 
 #convolution of color image array by Gaussian Filter
-def gaussian_filter_color_image(image, filter_size):
+def gaussian_filter_image_2(image, filter_size):
     img_height, img_width, channels = image.shape
-    filter = np.array([[1, 4, 7, 4, 1],
-                               [4, 16, 26, 16, 4],
-                               [7, 26, 41, 26, 7],
-                               [4, 16, 26, 16, 4],
-                               [1, 4, 7, 4, 1]]) / 273
+    if filter_size ==3:
+        filter = np.array([[1, 2, 1],
+                           [2, 4, 2],
+                           [1, 2, 1]]) / 16
+        padding = 1
+        padded_image = np.pad(image, ((padding, padding), (padding, padding), (0,0)), mode='constant')
+        filtered_image = np.zeros_like(image)
 
-    padding = 2
-    padded_image = np.pad(image, ((padding, padding), (padding, padding), (0,0)), mode='constant')
-    filtered_image = np.zeros_like(image)
+        for i in range(img_height):
+            for j in range(img_width):
+                for c in range(channels):
+                    patch = padded_image[i:i + filter_size, j:j + filter_size, c]
+                    filtered_image[i, j, c] = np.sum(patch * filter)
 
-    for i in range(img_height):
-        for j in range(img_width):
-            for c in range(channels):
-                patch = padded_image[i:i + filter_size, j:j + filter_size, c]
-                filtered_image[i, j, c] = np.sum(patch * filter)
+    elif filter_size ==5:
+        filter = np.array([[1, 4, 7, 4, 1],
+                                   [4, 16, 26, 16, 4],
+                                   [7, 26, 41, 26, 7],
+                                   [4, 16, 26, 16, 4],
+                                   [1, 4, 7, 4, 1]]) / 273
+
+        padding = 2
+        padded_image = np.pad(image, ((padding, padding), (padding, padding), (0,0)), mode='constant')
+        filtered_image = np.zeros_like(image)
+
+        for i in range(img_height):
+            for j in range(img_width):
+                for c in range(channels):
+                    patch = padded_image[i:i + filter_size, j:j + filter_size, c]
+                    filtered_image[i, j, c] = np.sum(patch * filter)
 
     return filtered_image
 
@@ -132,15 +163,21 @@ if __name__ == "__main__":
     image_path_2 = "filter2_img.jpg"
     original_image_1 = load_image(image_path_1)
     original_image_2 = load_image(image_path_2)
-    filtered_image_1 = gaussian_filter_gray_image(original_image_1, filter_size=3)
-    filtered_image_2 = gaussian_filter_color_image(original_image_2, filter_size=5)
+    filtered_image_1_3X3 = gaussian_filter_image_1(original_image_1, filter_size=3)
+    filtered_image_1_5X5= gaussian_filter_image_1(original_image_1, filter_size=5)
+    filtered_image_2_3X3 = gaussian_filter_image_2(original_image_2, filter_size=3)
+    filtered_image_2_5X5 = gaussian_filter_image_2(original_image_2, filter_size=5)
 
     # Displaying output after applying convolution using Gaussain Filter
     print("output from Gaussain Filter")
-    print("Convolution using 3 X 3 filter")
-    display_image_gaussian_filter(original_image_1, filtered_image_1)
-    print("Convolution using 5 X 5 filter")
-    display_image_gaussian_filter(original_image_2, filtered_image_2)
+    print("Convolution using 3 X 3 filter of Image 1")
+    display_image_gaussian_filter(original_image_1, filtered_image_1_3X3)
+    print("Convolution using 5 X 5 filter of Image 1")
+    display_image_gaussian_filter(original_image_1, filtered_image_1_5X5)
+    print("Convolution using 3 X 3 filter of Image 2")
+    display_image_gaussian_filter(original_image_2, filtered_image_2_3X3)
+    print("Convolution using 5 X 5 filter of Image 2")
+    display_image_gaussian_filter(original_image_2, filtered_image_2_5X5)
 
     # Displaying output after applying convolution using Derivative of Gaussain Filter
     print("output of image 1 from Derivative of Gaussain Filter")
