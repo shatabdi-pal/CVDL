@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 def load_image(image_path):
     image = Image.open(image_path)
     image_array = np.array(image)
+    #image_array = np.array(Image.open(image_path).convert('L'))
     return image_array
 
 #convolution of gray scale image array by Gaussian Filter
@@ -129,12 +130,12 @@ def DoG_filter_color_image(image):
 #Display Image from array
 def display_image_gaussian_filter(original_image, filtered_image):
     plt.subplot(1, 2, 1)
-    plt.imshow(original_image)
+    plt.imshow(original_image, cmap='gray')
     plt.title('Original Image')
     plt.axis('off')
 
     plt.subplot(1, 2, 2)
-    plt.imshow(filtered_image)
+    plt.imshow(filtered_image, cmap='gray')
     plt.title('Filtered Image')
     plt.axis('off')
     plt.show()
@@ -142,7 +143,7 @@ def display_image_gaussian_filter(original_image, filtered_image):
  # Display original images, gx, gy output of DoG filter
 def display_dog_filter_output(gx_output, gy_output, original_image):
     plt.subplot(1, 3, 1)
-    plt.imshow(original_image)
+    plt.imshow(original_image, cmap='gray')
     plt.title('Original Image')
     plt.axis('off')
 
