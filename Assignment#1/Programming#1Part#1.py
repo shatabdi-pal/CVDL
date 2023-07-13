@@ -2,7 +2,7 @@
 #Implemenation of Gaussian Filter, DoG Filter, Sobel Filter
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 import matplotlib.pyplot as plt
 
 
@@ -10,12 +10,12 @@ import matplotlib.pyplot as plt
 #converting image into image array
 def load_image(image_path):
     image = Image.open(image_path)
+    image = ImageOps.grayscale(image)
     image_array = np.array(image)
-    #image_array = np.array(Image.open(image_path).convert('L'))
     return image_array
 
 #convolution of gray scale image array by Gaussian Filter
-def gaussian_filter_image_1(image, filter_size):
+def gaussian_filter(image, filter_size):
     image_height, image_width = image.shape
     if filter_size == 3:
         filter = np.array([[1, 2, 1],
@@ -47,44 +47,9 @@ def gaussian_filter_image_1(image, filter_size):
     return filtered_image
 
 
-#convolution of color image array by Gaussian Filter
-def gaussian_filter_image_2(image, filter_size):
-    img_height, img_width, channels = image.shape
-    if filter_size ==3:
-        filter = np.array([[1, 2, 1],
-                           [2, 4, 2],
-                           [1, 2, 1]]) / 16
-        padding = 1
-        padded_image = np.pad(image, ((padding, padding), (padding, padding), (0,0)), mode='constant')
-        filtered_image = np.zeros_like(image)
-
-        for i in range(img_height):
-            for j in range(img_width):
-                for c in range(channels):
-                    patch = padded_image[i:i + filter_size, j:j + filter_size, c]
-                    filtered_image[i, j, c] = np.sum(patch * filter)
-
-    elif filter_size ==5:
-        filter = np.array([[1, 4, 7, 4, 1],
-                                   [4, 16, 26, 16, 4],
-                                   [7, 26, 41, 26, 7],
-                                   [4, 16, 26, 16, 4],
-                                   [1, 4, 7, 4, 1]]) / 273
-
-        padding = 2
-        padded_image = np.pad(image, ((padding, padding), (padding, padding), (0,0)), mode='constant')
-        filtered_image = np.zeros_like(image)
-
-        for i in range(img_height):
-            for j in range(img_width):
-                for c in range(channels):
-                    patch = padded_image[i:i + filter_size, j:j + filter_size, c]
-                    filtered_image[i, j, c] = np.sum(patch * filter)
-
-    return filtered_image
 
 #convolution of gray image array by Derivatives of Gaussian Filter
-def DoG_filter_gray_image(image):
+def DoG_filter(image):
     gx_filter = np.array([[1, 0, -1],
                           [2, 0, -2],
                           [1, 0, -1]])
@@ -101,29 +66,6 @@ def DoG_filter_gray_image(image):
         for j in range(1, image_width + 1):
             gx_result[i -1, j - 1] = np.sum(padded_image[i - 1: i + 2, j - 1 : j + 2]* gx_filter)
             gy_result[i - 1, j - 1] = np.sum(padded_image[i - 1: i + 2, j - 1: j + 2] * gy_filter)
-    return gx_result, gy_result
-
-
-#convolution of color image array by Derivatives of Gaussian Filter
-def DoG_filter_color_image(image):
-
-    gx_filter = np.array([[1, 0, -1],
-                          [2, 0, -2],
-                          [1, 0, -1]])
-    gy_filter = np.array([[1, 2, 1],
-                          [0, 0, 0],
-                          [-1, -2, -1]])
-    padding = 1
-    padded_image = np.pad(image, ((padding, padding), (padding, padding), (0,0)), mode="constant")
-
-    gx_result = np.zeros_like(image, dtype=np.float32)
-    gy_result = np.zeros_like(image, dtype=np.float32)
-    image_height, image_width, channels = image.shape
-    for c in range(channels):
-        for i in range(1, image_height + 1):
-            for j in range(1, image_width + 1):
-                gx_result[i - 1, j - 1,c] = np.sum(padded_image[i - 1: i + 2, j - 1: j + 2, c] * gx_filter)
-                gy_result[i - 1, j - 1, c] = np.sum(padded_image[i - 1: i + 2, j - 1: j + 2, c] * gy_filter)
     return gx_result, gy_result
 
 
@@ -164,10 +106,10 @@ if __name__ == "__main__":
     image_path_2 = "filter2_img.jpg"
     original_image_1 = load_image(image_path_1)
     original_image_2 = load_image(image_path_2)
-    filtered_image_1_3X3 = gaussian_filter_image_1(original_image_1, filter_size=3)
-    filtered_image_1_5X5= gaussian_filter_image_1(original_image_1, filter_size=5)
-    filtered_image_2_3X3 = gaussian_filter_image_2(original_image_2, filter_size=3)
-    filtered_image_2_5X5 = gaussian_filter_image_2(original_image_2, filter_size=5)
+    filtered_image_1_3X3 = gaussian_filter(original_image_1, filter_size=3)
+    filtered_image_1_5X5= gaussian_filter(original_image_1, filter_size=5)
+    filtered_image_2_3X3 = gaussian_filter(original_image_2, filter_size=3)
+    filtered_image_2_5X5 = gaussian_filter(original_image_2, filter_size=5)
 
     # Displaying output after applying convolution using Gaussain Filter
     print("output from Gaussain Filter")
@@ -182,14 +124,14 @@ if __name__ == "__main__":
 
     # Displaying output after applying convolution using Derivative of Gaussain Filter
     print("output of image 1 from Derivative of Gaussain Filter")
-    gx_filtered_output_1, gy_filtered_output_1 = DoG_filter_gray_image(original_image_1)
+    gx_filtered_output_1, gy_filtered_output_1 = DoG_filter(original_image_1)
 
     #Normalizing output of Derivative of Gaussain Filter
     gx_filtered_output_1 = (gx_filtered_output_1- gx_filtered_output_1.min()) / (gx_filtered_output_1.max() - gx_filtered_output_1.min())
     gy_filtered_output_1 = (gy_filtered_output_1 - gy_filtered_output_1.min()) / (gy_filtered_output_1.max() - gy_filtered_output_1.min())
     display_dog_filter_output(gx_filtered_output_1, gy_filtered_output_1, original_image_1)
     print("output of image 2 from Derivative of Gaussain Filter")
-    gx_filtered_output_2, gy_filtered_output_2 = DoG_filter_color_image(original_image_2)
+    gx_filtered_output_2, gy_filtered_output_2 = DoG_filter(original_image_2)
     gx_filtered_output_2 = (gx_filtered_output_2 - gx_filtered_output_2.min()) / (
                 gx_filtered_output_2.max() - gx_filtered_output_2.min())
     gy_filtered_output_2 = (gy_filtered_output_2 - gy_filtered_output_2.min()) / (
