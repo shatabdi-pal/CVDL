@@ -95,20 +95,25 @@ def image_k_means(image, K, max_iters=100, r=10):
 image1 = Image.open("Kmean_img1.jpg")
 image2 = Image.open("Kmean_img2.jpg")
 
-# Run K-Means for K=5 and K=10 on the images
-k_values_images = [5, 10]
-errors_images = []
+# Run K-Means for K=5 and K=10 on the image
+def k_means_image(image):
+    k_values_images = [5, 10]
+    errors_images = []
 
-for i, K in enumerate(k_values_images):
-    centriods, image_clusters, sse = image_k_means(image1, K)
-    errors_images.append(sse)
+    for i, K in enumerate(k_values_images):
+        centriods, image_clusters, sse = image_k_means(image, K)
+        errors_images.append(sse)
 
-    plt.figure()
-    plt.imshow(image_clusters, cmap='viridis')
-    plt.title(f'K = {K}, SSE = {sse:.2f}')
-    plt.axis('off')
-    plt.show()
+        plt.figure()
+        plt.imshow(image_clusters, cmap='viridis')
+        plt.title(f'K = {K}, SSE = {sse:.2f}')
+        plt.axis('off')
+        plt.show()
 
-# Print the sum of squares error for each K value
-for i, K in enumerate(k_values_images):
-    print(f'K = {K}, SSE = {errors_images[i]:.2f}')
+    # Print the sum of squares error for each K value
+    for i, K in enumerate(k_values_images):
+        print(f'K = {K}, SSE = {errors_images[i]:.2f}')
+
+
+k_means_image(image1)
+k_means_image(image2)
