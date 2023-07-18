@@ -72,11 +72,11 @@ def lucas_kanade_method(frame1, frame2):
 
 def visualize_optical_flow(image, Vx, Vy):
     n, m = Vx.shape
-    u_direction = Vx[np.ix_(range(0, n, 5), range(0, m, 5))]
-    v_direction = Vy[np.ix_(range(0, n, 5), range(0, m, 5))]
+    X_direction = Vx[np.ix_(range(0, n, 70), range(0, m, 70))]
+    Y_direction = Vy[np.ix_(range(0, n, 70), range(0, m, 70))]
     [X, Y] = np.meshgrid(np.arange(m, dtype='float64'), np.arange(n, dtype='float64'))
-    X_pos = X[np.ix_(range(0, n, 5), range(0, m, 5))]
-    Y_pos= Y[np.ix_(range(0, n, 5), range(0, m, 5))]
+    X_pos = X[np.ix_(range(0, n, 70), range(0, m, 70))]
+    Y_pos= Y[np.ix_(range(0, n, 70), range(0, m, 70))]
     plt.figure(figsize=(12, 6))
     plt.subplot(121)
     plt.imshow(image, cmap='gray')
@@ -84,7 +84,7 @@ def visualize_optical_flow(image, Vx, Vy):
     plt.subplot(122)
     plt.title('Optical Flow in image')
     plt.imshow(image, cmap='gray')
-    plt.quiver(X_pos, Y_pos, u_direction, v_direction)
+    plt.quiver(X_pos, Y_pos, X_direction, Y_direction)
     plt.show()
 
 if __name__ == "__main__":
