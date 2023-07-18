@@ -69,21 +69,23 @@ def lucas_kanade_method(frame1, frame2):
 
     return Vx, Vy
 
-def visualize_optical_flow(flow_x, flow_y):
-    # Compute the magnitude and angle of the flow
-    magnitude = np.sqrt(flow_x ** 2 + flow_y** 2)
-    angle = np.arctan2(flow_x , flow_y)
 
-    # Normalize the magnitude
-    # magnitude = (magnitude - np.min(magnitude)) / (np.max(magnitude) - np.min(magnitude))
-
-    # Convert the angle to RGB color
-    hue = angle * 180 / np.pi / 2
-    hsv = np.stack((hue, np.ones_like(hue), magnitude), axis=-1)
-    rgb = plt.get_cmap('hsv')(hsv)
-
-    return rgb
-
+def visualize_optical_flow(image, Vx, Vy):
+    n, m = Vx.shape
+    u_direction = Vx[np.ix_(range(0, n, 5), range(0, m, 5))]
+    v_direction = Vy[np.ix_(range(0, n, 5), range(0, m, 5))]
+    [X, Y] = np.meshgrid(np.arange(m, dtype='float64'), np.arange(n, dtype='float64'))
+    X_pos = X[np.ix_(range(0, n, 5), range(0, m, 5))]
+    Y_pos= Y[np.ix_(range(0, n, 5), range(0, m, 5))]
+    plt.figure(figsize=(12, 6))
+    plt.subplot(121)
+    plt.imshow(image, cmap='gray')
+    plt.title('Orginal image')
+    plt.subplot(122)
+    plt.title('Optical Flow in image')
+    plt.imshow(image, cmap='gray')
+    plt.quiver(X_pos, Y_pos, u_direction, v_direction)
+    plt.show()
 
 if __name__ == "__main__":
     path_1_a = "frame1_a.png"
@@ -92,49 +94,33 @@ if __name__ == "__main__":
     path_2_b = "frame2_b.png"
     
     frame_1_a = load_image(path_1_a)
-    frame_1_b = load_image(path_1_a)
+    frame_1_b = load_image(path_1_b)
     frame_2_a = load_image(path_2_a)
     frame_2_b = load_image(path_2_b)
+
     # Calculate optical flow
     Vx_1, Vy_1 = lucas_kanade_method(frame_1_a, frame_1_b)
     Vx_2, Vy_2 = lucas_kanade_method(frame_2_a, frame_2_b)
 
-    print(Vx_1, Vy_1)
-    print(Vx_2, Vy_2)
+    # Visualize optical flow
+    visualize_optical_flow(frame_1_a, Vx_1, Vy_1)
+    visualize_optical_flow(frame_2_a, Vx_2, Vy_2)
 
-    # # Visualize optical flow vectors
-    # flow_vis_1 = visualize_optical_flow(Vx_1, Vy_1)
-    # flow_vis_2 = visualize_optical_flow(Vx_2, Vy_2)
-    #
-    # plt.figure(figsize=(12, 6))
-    #
-    # plt.subplot(121)
-    # plt.title('Visualization of Optical Flow (Frame 1)')
-    # plt.imshow(flow_vis_1)
-    # plt.axis('off')
-    #
-    # plt.subplot(122)
-    # plt.title('Visualization of Optical Flow (Frame 2)')
-    # plt.imshow(flow_vis_2)
-    # plt.axis('off')
-    #
-    # plt.tight_layout()
-    # plt.show()
 
-    # Visualize magnitude of optical flow
+    #Visualize magnitude of optical flow
     magnitude_1 = np.sqrt(Vx_1 ** 2 + Vy_1 ** 2)
     magnitude_2 = np.sqrt(Vx_2 ** 2 + Vy_2 ** 2)
 
     plt.figure(figsize=(12, 6))
 
     plt.subplot(121)
-    plt.imshow(magnitude_1, cmap='viridis')
+    plt.imshow(magnitude_1, cmap='gray')
     plt.title('Magnitude of Optical Flow (Frame 1)')
     plt.colorbar()
     plt.axis('off')
 
     plt.subplot(122)
-    plt.imshow(magnitude_2, cmap='viridis')
+    plt.imshow(magnitude_2, cmap='gray')
     plt.title('Magnitude of Optical Flow (Frame 2)')
     plt.colorbar()
     plt.axis('off')
