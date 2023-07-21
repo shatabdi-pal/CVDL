@@ -1,10 +1,10 @@
+#implementation of Lucas Kanade method for optical flow estimation
+
 from PIL import Image, ImageOps
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-
-
+#Read image
 def load_image(image_path):
     image = Image.open(image_path)
     image = ImageOps.grayscale(image)
@@ -12,7 +12,7 @@ def load_image(image_path):
     return image_array
 
 
-
+#computing spatial gradient
 def spatial_gradient(frame1):
     gx_filter = np.array([[1, 0, -1],
                           [2, 0, -2],
@@ -37,6 +37,8 @@ def spatial_gradient(frame1):
     Iy = (Iy -Iy.min()) / (Iy.max() -Iy.min())
     return Ix,Iy
 
+
+#Lucas Kanade method
 def lucas_kanade_method(frame1, frame2):
     # Compute spatial gradient
     Ix, Iy = spatial_gradient(frame1)
@@ -69,7 +71,7 @@ def lucas_kanade_method(frame1, frame2):
 
     return Vx, Vy
 
-
+#Visualize optical flow vectors
 def visualize_optical_flow(image, Vx, Vy):
     n, m = Vx.shape
     X_direction = Vx[np.ix_(range(0, n, 70), range(0, m, 70))]
@@ -78,13 +80,20 @@ def visualize_optical_flow(image, Vx, Vy):
     X_pos = X[np.ix_(range(0, n, 70), range(0, m, 70))]
     Y_pos= Y[np.ix_(range(0, n, 70), range(0, m, 70))]
     plt.figure(figsize=(12, 6))
-    plt.subplot(121)
+    plt.subplot(141)
     plt.imshow(image, cmap='gray')
     plt.title('Orginal image')
-    plt.subplot(122)
+    plt.subplot(142)
+    plt.imshow(Vx, cmap='gray')
+    plt.title('OpticalFlow in X direction')
+    plt.subplot(143)
+    plt.imshow(Vy, cmap='gray')
+    plt.title('OpticalFlow in Y direction')
+    plt.subplot(144)
     plt.title('Optical Flow in image')
     plt.imshow(image, cmap='gray')
     plt.quiver(X_pos, Y_pos, X_direction, Y_direction)
+    plt.tight_layout()
     plt.show()
 
 if __name__ == "__main__":
