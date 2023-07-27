@@ -1,3 +1,4 @@
+#implementation for gradient descent
 import numpy as np
 
 def loss_function(w):

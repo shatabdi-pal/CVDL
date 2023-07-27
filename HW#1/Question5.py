@@ -1,3 +1,4 @@
+#implementation for histogram equalization
 import numpy as np
 import matplotlib.pyplot as plt
 

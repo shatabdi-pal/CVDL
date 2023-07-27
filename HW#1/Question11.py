@@ -1,3 +1,4 @@
+#Implementation for convolution,maxpooling and sigmoid activatio
 import numpy as np
 
 # Given input matrix I
@@ -20,21 +21,21 @@ f1_2 = np.array([[1, 0, 0],
 b1_2 = -1
 
 # Function for 2D convolution operation
-def convolve2D(input_matrix, kernel):
-    return np.rot90(np.array([[np.sum(np.multiply(input_matrix[i:i+kernel.shape[0], j:j+kernel.shape[1]], kernel))
-                              for j in range(input_matrix.shape[1] - kernel.shape[1] + 1)]
-                             for i in range(input_matrix.shape[0] - kernel.shape[0] + 1)]), 2)
+def convolve2D(image, filter):
+    return np.rot90(np.array([[np.sum(np.multiply(image[i:i+filter.shape[0], j:j+filter.shape[1]], filter))
+                              for j in range(image.shape[1] - filter.shape[1] + 1)]
+                             for i in range(image.shape[0] - filter.shape[0] + 1)]), 2)
 
 # Function for 2x2 max pooling operation
-def max_pooling(input_matrix, kernel_size=(2, 2), stride=2):
-    output_shape = ((input_matrix.shape[0] - kernel_size[0]) // stride) + 1
-    return np.array([[np.max(input_matrix[i:i+kernel_size[0], j:j+kernel_size[1]])
-                      for j in range(0, input_matrix.shape[1], stride)]
-                     for i in range(0, input_matrix.shape[0], stride)])
+def max_pooling(image, filter_size=(2, 2), stride=2):
+    output_shape = ((image.shape[0] - filter_size[0]) // stride) + 1
+    return np.array([[np.max(image[i:i+filter_size[0], j:j+filter_size[1]])
+                      for j in range(0, image.shape[1], stride)]
+                     for i in range(0, image.shape[0], stride)])
 
 # Function for sigmoid activation
-def sigmoid_activation(input_matrix):
-    return 1 / (1 + np.exp(-input_matrix))
+def sigmoid_activation(image):
+    return 1 / (1 + np.exp(-image))
 
 # Convolution and applying biases
 fm1 = convolve2D(I, f1_1) + b1_1
@@ -46,8 +47,8 @@ print(fm1)
 print("\nFeature Map 2:")
 print(fm2)
 # Apply 2x2 max pooling
-pooled_fm1 = max_pooling(fm1, kernel_size=(2, 2), stride=2)
-pooled_fm2 = max_pooling(fm2, kernel_size=(2, 2), stride=2)
+pooled_fm1 = max_pooling(fm1, filter_size=(2, 2), stride=2)
+pooled_fm2 = max_pooling(fm2, filter_size=(2, 2), stride=2)
 
 print("Max pooling on Feature Map 1:")
 print(pooled_fm1)
