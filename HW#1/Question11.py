@@ -33,11 +33,13 @@ def max_pooling(image, filter_size=(2, 2), stride=2):
                       for j in range(0, image.shape[1], stride)]
                      for i in range(0, image.shape[0], stride)])
 
+
 # Function for sigmoid activation
 def sigmoid_activation(image):
     return 1 / (1 + np.exp(-image))
 
 # Convolution and applying biases
+print(convolve2D(I, f1_1))
 fm1 = convolve2D(I, f1_1) + b1_1
 fm2 = convolve2D(I, f1_2) + b1_2
 
