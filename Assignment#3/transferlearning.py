@@ -19,7 +19,7 @@ from keras.layers import Input
 pre_model = InceptionResNetV2(weights ="imagenet", include_top=False, input_shape=(150, 150,3))
 
 #print the model summary
-#pre_model.summary()
+pre_model.summary()
 
 # Access the first convolutional layer (index 1)
 first_conv_layer = pre_model.layers[1]
@@ -212,5 +212,23 @@ sub_model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accura
 sub_model.summary()
 
 
+# Train the sub-network model on the training data
+history_sub = sub_model.fit(train_data, train_labels, batch_size=32, epochs=10, validation_split=0.1)
+
+# Evaluate the sub-network model on the test dataset
+loss_sub, accuracy_sub = sub_model.evaluate(test_data, test_labels)
+
+# Print the per-epoch test loss for the sub-network model
+print('Per-epoch Test Loss for Sub-Network:')
+print(loss_sub)
+
+# Create predictions for the test data using the sub-network model
+predictions_sub = sub_model.predict(test_data)
+predicted_labels_sub = np.argmax(predictions_sub, axis=1)
+
+# Create and print the confusion matrix for the sub-network model
+confusion_mat_sub = confusion_matrix(true_labels, predicted_labels_sub)
+print('Confusion Matrix for Sub-Network Model:')
+print(confusion_mat_sub)
 
 
